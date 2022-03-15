@@ -1,36 +1,56 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
-//Declarer corsOptions origin: Accepter les requetes qui proviennent de cette URL (Application Front end)
-var corsOptions = {
-  origin: "http://localhost:8081"
+const dotenv = require("dotenv");
+dotenv.config();
+const http = require('http');
+const { exit } = require('process');
+const app = require('./app');
+
+const normalizePort = val => {
+    const port = parseInt(val, 10);
+    if (isNaN(port)) {
+      if (isNaN(val)) {
+        return false
+      }
+      return val;
+    }
+    if (port >= 0) {
+      return port;
+    }
+    return false;
 };
-//Ajouter corsOptions dans le module cors
-app.use(cors(corsOptions));
-//Analyser les cors des requetes
-app.use(express.json());
-//requetes initiale pour tester 
-app.get("/", (req, res) => {
-  res.json({ message: "Projet 6" });
-});
-//Demarrer l'application bac avec un message dans la console indiquant le port utilisé
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+const port = normalizePort(process.env.PORT || '3000');
+if (port == false) {
+  exit()
+}
+app.set('port', port);
+
+//Différentes erreurs + gestion de celles-ci 
+const errorHandler = error => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  const address = server.address();
+  const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges.');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use.');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+};
+//Enregistré dans le serveur 
+const server = http.createServer(app);
+
+server.on('error', errorHandler);
+server.on('listening', () => {
+  const address = server.address();
+  const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+  console.log('Listening on ' + bind);
 });
 
-const db = require("./models");
-const Role = db.role;
-const dbConfig = require("./config/db.config");
-db.mongoose
-  .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => {
-    console.log("Successfully connect to Database");
-  })
-  .catch(err => {
-    console.error("Connection error", err);
-    process.exit();
-  });
+server.listen(port);
