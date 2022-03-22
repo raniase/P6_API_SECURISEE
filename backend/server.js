@@ -3,24 +3,27 @@ dotenv.config();
 const http = require('http');
 const { exit } = require('process');
 const app = require('./app');
+//Require pour importer le package
 
+//Renvoi du port valide, sous la forme d'un numéro ou d'une chaîne
 const normalizePort = val => {
-    const port = parseInt(val, 10);
-    if (isNaN(port)) {
-      if (isNaN(val)) {
-        return false
-      }
-      return val;
+  const port = parseInt(val, 10);
+  if (isNaN(port)) {
+    if (isNaN(val)) {
+      return false
     }
-    if (port >= 0) {
-      return port;
-    }
-    return false;
+    return val;
+  }
+  if (port >= 0) {
+    return port;
+  }
+  return false;
 };
 const port = normalizePort(process.env.PORT || '3000');
 if (port == false) {
   exit()
 }
+
 app.set('port', port);
 
 //Différentes erreurs + gestion de celles-ci 

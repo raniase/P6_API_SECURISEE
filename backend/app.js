@@ -4,7 +4,10 @@ const app = express();
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const path = require('path');
+const saucesRoutes = require('./routes/sauces.route');
 const userRoutes = require("./routes/user.route");
+
+
 
 const cors = require("cors");
 let corsOptions = {
@@ -32,11 +35,13 @@ app.use(function (req, response, next) {
   next();
 });
 app.use(cors(corsOptions));
-
 //Gestion des requêtes POST
 app.use(express.json());
+//Middleware qui sert le dossier images
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
+//Enregistrement du routeur
 app.use('/api/auth', userRoutes);
-
+app.use('/api/sauces', saucesRoutes);
 
 module.exports = app;
